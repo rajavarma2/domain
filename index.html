@@ -1,44 +1,263 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login & Signup - Timetable System</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Timetable System - Hackathon Prototype</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <div class="auth-container">
-    <h1>Timetable Management System</h1>
-    
-    <!-- Login Form -->
-    <div id="login-form" class="form-box">
-      <h2>Login</h2>
-      <input type="text" id="login-username" placeholder="Username / Email">
-      <input type="password" id="login-password" placeholder="Password">
-      <select id="login-role">
-        <option value="admin">Admin</option>
-        <option value="scheduler">Scheduler</option>
-        <option value="faculty">Faculty</option>
-      </select>
-      <button onclick="login()">Login</button>
-      <p>Don’t have an account? <a href="#" onclick="toggleForms()">Signup</a></p>
-    </div>
+  <header class="topbar">
+    <h1>Timetable System</h1>
+    <div id="userpanel"></div>
+  </header>
 
-    <!-- Signup Form -->
-    <div id="signup-form" class="form-box hidden">
-      <h2>Signup</h2>
-      <input type="text" id="signup-username" placeholder="Username">
-      <input type="email" id="signup-email" placeholder="Email">
-      <input type="password" id="signup-password" placeholder="Password">
-      <select id="signup-role">
-        <option value="admin">Admin</option>
-        <option value="scheduler">Scheduler</option>
-        <option value="faculty">Faculty</option>
-      </select>
-      <button onclick="signup()">Signup</button>
-      <p>Already have an account? <a href="#" onclick="toggleForms()">Login</a></p>
-    </div>
-  </div>
-  <script src="script.js"></script>
+  <main id="app">
+    <!-- LOGIN (no signup) -->
+    <section id="page-auth" class="card center">
+      <h2>Login</h2>
+      <div class="auth-grid">
+        <input id="login-username" placeholder="username or email" />
+        <input id="login-password" type="password" placeholder="password" />
+        <select id="login-role">
+          <option value="Admin">Admin</option>
+          <option value="Scheduler">Scheduler</option>
+          <option value="Faculty">Faculty</option>
+          <option value="Approver">Approver</option>
+        </select>
+        <button id="btn-login">Login</button>
+      </div>
+      <small class="muted">Seed users: admin/admin (Admin), scheduler/scheduler (Scheduler), faculty/faculty (Faculty), approver/approver (Approver)</small>
+    </section>
+
+    <!-- APP SHELL -->
+    <section id="page-app" class="hidden">
+      <aside id="sidebar" class="card">
+        <div class="sidebar-user" id="sidebar-user"></div>
+        <nav>
+          <button class="nav" data-page="dashboard">Dashboard</button>
+          <button class="nav" data-page="scheduler">Scheduler</button>
+          <button class="nav" data-page="viewer">Timetable Viewer</button>
+          <button class="nav" data-page="faculty">Faculty Portal</button>
+          <button class="nav" data-page="approval">Approvals</button>
+          <button class="nav" data-page="analytics">Analytics</button>
+          <button id="btn-logout" class="danger">Logout</button>
+        </nav>
+      </aside>
+
+      <section id="content">
+        <!-- Dashboard -->
+        <div id="dashboard" class="page">
+          <h2>Admin Dashboard</h2>
+          <div class="grid-3">
+            <div class="card small">
+              <h3>Faculty</h3>
+              <form id="faculty-form" class="inline">
+                <input name="fname" placeholder="Name" required />
+                <input name="fdept" placeholder="Department" />
+                <button>Add</button>
+              </form>
+              <input id="faculty-csv" type="file" accept=".csv" />
+              <div id="faculty-list" class="list"></div>
+            </div>
+
+            <div class="card small">
+              <h3>Students / Batches</h3>
+              <form id="batch-form" class="inline">
+                <input name="bname" placeholder="Batch name (e.g. 1A)" required />
+                <input name="bsize" type="number" placeholder="Size" value="30" />
+                <button>Add</button>
+              </form>
+              <div id="batch-list" class="list"></div>
+            </div>
+
+            <div class="card small">
+              <h3>Classrooms</h3>
+              <form id="room-form" class="inline">
+                <input name="rname" placeholder="Room (R101)" required />
+                <select name="rtype"><option>Classroom</option><option>Lab</option></select>
+                <button>Add</button>
+              </form>
+              <div id="room-list" class="list"></div>
+            </div>
+
+            <div class="card small">
+              <h3>Subjects / Courses</h3>
+              <form id="subject-form" class="inline">
+                <input name="scode" placeholder="Code e.g. MAT101" required />
+                <input name="stitle" placeholder="Title" required />
+                <input name="sdept" placeholder="Department" />
+                <button>Add</button>
+              </form>
+              <div id="subject-list" class="list"></div>
+            </div>
+
+            <div class="card small">
+              <h3>Departments</h3>
+              <form id="dept-form" class="inline">
+                <input name="dname" placeholder="Department name" required />
+                <button>Add</button>
+              </form>
+              <div id="dept-list" class="list"></div>
+            </div>
+
+            <div class="card small">
+              <h3>Quick Actions</h3>
+              <button id="btn-generate-sample">Generate Sample Data</button>
+              <button id="btn-clear-data" class="danger">Clear All Data</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scheduler -->
+        <div id="scheduler" class="page hidden">
+          <h2>Scheduler</h2>
+          <div class="card">
+            <form id="scheduler-form" class="grid-2">
+              <div>
+                <label>Days per week
+                  <select id="input-days"><option value="5">5 (Mon-Fri)</option><option value="6">6 (Mon-Sat)</option></select>
+                </label>
+
+                <label>Shifts
+                  <select id="input-shifts" multiple>
+                    <option value="Morning" selected>Morning (9-1)</option>
+                    <option value="Afternoon" selected>Afternoon (1-5)</option>
+                  </select>
+                </label>
+
+                <label>Slots (hours per day) — default 9→17 hourly:
+                  <input id="input-start" type="number" value="9" min="0" /> to <input id="input-end" type="number" value="17" min="1" />
+                </label>
+
+                <label>Rooms per slot (parallel classes)
+                  <input id="input-roomsPerSlot" type="number" value="3" min="1" />
+                </label>
+
+                <label>Number of timetable options to generate
+                  <input id="input-options" type="number" value="3" min="1" />
+                </label>
+              </div>
+
+              <div>
+                <label>Subject frequencies (JSON) <small class="muted">e.g. {"MAT101":3,"PHY101":2}</small>
+                  <textarea id="input-freq" placeholder='{"MAT101":3,"PHY101":2}'></textarea>
+                </label>
+
+                <label>Faculty unavailability (JSON) <small class="muted">e.g. {"Prof A":["Mon-9","Tue-11"]}</small>
+                  <textarea id="input-constraints" placeholder='{"Prof A":["Mon-9"]}'></textarea>
+                </label>
+
+                <label>Departments / Multi-shift mapping (JSON) <small class="muted">optional</small>
+                  <textarea id="input-deptmap" placeholder='{"CSE":"Morning","ECE":"Afternoon"}'></textarea>
+                </label>
+
+                <div class="row">
+                  <button id="btn-run-scheduler">Run Scheduler</button>
+                  <button id="btn-preview-grid" type="button">Preview Empty Grid</button>
+                </div>
+              </div>
+            </form>
+
+            <div id="scheduler-progress" class="hidden row center">
+              <div class="spinner"></div><div id="progress-text">Generating...</div>
+              <progress id="progress-bar" value="0" max="100"></progress>
+            </div>
+          </div>
+
+          <div id="options-area" class="card hidden">
+            <h3>Generated Options</h3>
+            <div id="options-list" class="list"></div>
+            <div id="option-preview" class="mt"></div>
+          </div>
+        </div>
+
+        <!-- Timetable Viewer -->
+        <div id="viewer" class="page hidden">
+          <h2>Timetable Viewer</h2>
+
+          <div class="card row wrap">
+            <label>Filter Batch
+              <select id="filter-batch"><option value="">All</option></select>
+            </label>
+            <label>Filter Faculty
+              <select id="filter-faculty"><option value="">All</option></select>
+            </label>
+            <label>Filter Room
+              <select id="filter-room"><option value="">All</option></select>
+            </label>
+            <label>Option
+              <select id="select-option"></select>
+            </label>
+            <div class="row">
+              <button id="btn-save-manual">Save Manual Version</button>
+              <button id="btn-reset-latest">Reset to Selected</button>
+              <button id="btn-export-csv">Export CSV</button>
+              <button id="btn-print">Print / PDF</button>
+            </div>
+          </div>
+
+          <div id="timetable-container" class="card"></div>
+
+          <div id="conflicts" class="card hidden">
+            <h4>Conflicts</h4>
+            <ul id="conflict-list"></ul>
+            <div id="suggestions" class="mt"></div>
+          </div>
+        </div>
+
+        <!-- Faculty Portal -->
+        <div id="faculty" class="page hidden">
+          <h2>Faculty Portal</h2>
+          <div class="card">
+            <label>Logged as:
+              <strong id="faculty-name"></strong>
+            </label>
+            <div class="mt">
+              <h4>My Timetable</h4>
+              <div id="faculty-timetable"></div>
+            </div>
+            <div class="mt">
+              <h4>Attendance Records</h4>
+              <div id="attendance-report"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Approvals -->
+        <div id="approval" class="page hidden">
+          <h2>Approvals</h2>
+          <div class="card">
+            <h4>Versions</h4>
+            <div id="version-list" class="list"></div>
+            <div id="approval-panel" class="mt hidden card">
+              <h4 id="approval-title"></h4>
+              <div id="approval-preview"></div>
+              <label>Comments<input id="approval-comment" /></label>
+              <div class="row">
+                <button id="btn-approve" class="ok">Approve</button>
+                <button id="btn-reject" class="danger">Reject</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analytics -->
+        <div id="analytics" class="page hidden">
+          <h2>Analytics</h2>
+          <div class="card">
+            <h4>Room Utilization</h4>
+            <div id="analytics-room"></div>
+            <h4>Faculty Workload</h4>
+            <div id="analytics-faculty"></div>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <footer class="muted center pad">Prototype - Local only. Data saved to browser localStorage.</footer>
+
+  <script src="app.js"></script>
 </body>
 </html>
