@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scheduler</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Scheduler</h1>
+    <button onclick="logout()">Logout</button>
+  </header>
+
+  <section>
+    <h2>Input Parameters</h2>
+    <form>
+      <label>Number of Classrooms <input type="number"></label>
+      <label>Number of Batches <input type="number"></label>
+      <label>Number of Subjects <input type="number"></label>
+      <label>Max Classes/Day <input type="number"></label>
+      <label>Faculty Count <input type="number"></label>
+      <label>Average Faculty Leaves/Month <input type="number"></label>
+      <label>Special Fixed Classes <input type="text"></label>
+    </form>
+    <button onclick="generateTimetable()">Generate Timetable</button>
+    <div id="progress" class="hidden">Generating...</div>
+  </section>
+</body>
+</html>
